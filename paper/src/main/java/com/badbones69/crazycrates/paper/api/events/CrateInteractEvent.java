@@ -6,7 +6,6 @@ import com.badbones69.crazycrates.paper.api.enums.other.Plugins;
 import com.badbones69.crazycrates.paper.api.objects.crates.CrateLocation;
 import com.badbones69.crazycrates.paper.tasks.crates.CrateManager;
 import com.nexomc.nexo.api.NexoFurniture;
-import com.nexomc.nexo.api.events.furniture.NexoFurnitureBreakEvent;
 import com.nexomc.nexo.api.events.furniture.NexoFurnitureInteractEvent;
 import io.th0rgal.oraxen.api.OraxenFurniture;
 import io.th0rgal.oraxen.api.events.furniture.OraxenFurnitureBreakEvent;
@@ -17,6 +16,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +30,7 @@ public class CrateInteractEvent extends Event implements Cancellable {
     private final CrateManager crateManager = this.platform.getCrateManager();
 
     private NexoFurnitureInteractEvent nexoInteractEvent;
-    private NexoFurnitureBreakEvent nexoBreakEvent;
+    private BlockDamageEvent nexoBreakEvent;
 
     private OraxenFurnitureInteractEvent oraxenInteractEvent;
     private OraxenFurnitureBreakEvent oraxenBreakEvent;
@@ -90,7 +90,7 @@ public class CrateInteractEvent extends Event implements Cancellable {
         }
     }
 
-    public CrateInteractEvent(@NotNull final NexoFurnitureBreakEvent breakEvent, @NotNull final Action action, @NotNull final Location location) {
+    public CrateInteractEvent(@NotNull final BlockDamageEvent breakEvent, @NotNull final Action action, @NotNull final Location location) {
         this.nexoBreakEvent = breakEvent;
 
         this.player = this.nexoBreakEvent.getPlayer();

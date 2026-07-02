@@ -4,14 +4,16 @@ import com.badbones69.crazycrates.paper.CrazyCrates;
 import com.badbones69.crazycrates.paper.api.CrazyCratesPaper;
 import com.badbones69.crazycrates.paper.api.events.CrateInteractEvent;
 import com.badbones69.crazycrates.paper.tasks.crates.CrateManager;
-import com.nexomc.nexo.api.events.furniture.NexoFurnitureBreakEvent;
+import com.nexomc.nexo.api.NexoFurniture;
 import com.nexomc.nexo.api.events.furniture.NexoFurnitureInteractEvent;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
 public class NexoInteractListener implements Listener {
@@ -45,9 +47,10 @@ public class NexoInteractListener implements Listener {
     }
 
     @EventHandler
-    public void onFurnitureBreakEvent(NexoFurnitureBreakEvent event) {
-        final ItemDisplay itemDisplay = event.getBaseEntity();
-        final Location location = itemDisplay.getLocation();
+    public void onFurnitureBreakEvent(BlockDamageEvent event) {
+        final Block block = event.getBlock();
+        final Location location = block.getLocation();
+        if (!NexoFurniture.isFurniture(location)) return;
 
         final Player player = event.getPlayer();
 
