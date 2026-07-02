@@ -310,6 +310,52 @@ public class CommandOpen extends BaseCommand {
             }
 
             switch (crateType) {
+                case csgo_casino -> {
+                    final ConfigurationSection section = configuration.getConfigurationSection("random");
+
+                    if (section != null) {
+                        final boolean isRandom = section.getBoolean("toggle", false);
+
+                        if (isRandom) {
+                            final List<Tier> tiers = crate.getTiers();
+
+                            final int size = tiers.size();
+
+                            final ThreadLocalRandom random = ThreadLocalRandom.current();
+
+                            final Tier tier = tiers.get(random.nextInt(size));
+
+                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, tier));
+                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, tier));
+                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, tier));
+                        } else {
+                            @Nullable final Tier row_uno = crate.getTier(section.getString("types.row-1", ""));
+                            @Nullable final Tier row_dos = crate.getTier(section.getString("types.row-2", ""));
+                            @Nullable final Tier row_tres = crate.getTier(section.getString("types.row-3", ""));
+
+                            if (row_uno == null || row_dos == null || row_tres == null) {
+                                if (this.fusion.isVerbose()) {
+                                    List.of(
+                                            "One of your rows has a tier that doesn't exist supplied in " + fileName,
+                                            "You can find this in your crate config, search for row-1, row-2, and row-3"
+                                    ).forEach(this.logger::warn);
+                                }
+
+                                currentAmount--;
+                                keysRefund++;
+
+                                isLoopBroken = true;
+
+                                break;
+                            }
+
+                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, row_uno));
+                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, row_dos));
+                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, row_tres));
+                        }
+                    }
+                }
+
                 case casino -> {
                     final ConfigurationSection section = configuration.getConfigurationSection("random");
 

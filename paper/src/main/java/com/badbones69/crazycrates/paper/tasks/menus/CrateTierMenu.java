@@ -31,7 +31,7 @@ public class CrateTierMenu extends StaticInventoryBuilder {
 
         final CrateType crateType = this.crate.getCrateType();
 
-        if (crateType != CrateType.casino && crateType != CrateType.cosmic) return;
+        if (crateType != CrateType.casino && crateType != CrateType.cosmic && crateType != CrateType.csgo_casino) return;
 
         final boolean isPreviewBorderEnabled = this.crate.isPreviewTierBorderToggle();
 
@@ -45,6 +45,8 @@ public class CrateTierMenu extends StaticInventoryBuilder {
 
         final List<Tier> tiers = this.crate.getTiers();
 
+        // Need to add logic to include getTierWeightGroupItem which will display chance in the crate preview menu I believe? If tierGroup is still used
+        // current solution is setting 100D for the given crate type
         tiers.forEach(tier -> {
             final ItemStack item = tier.getTierItem(this.player, this.crate);
             final int slot = tier.getSlot();

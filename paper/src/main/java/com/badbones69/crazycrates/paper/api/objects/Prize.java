@@ -199,7 +199,7 @@ public class Prize {
 
         final CrateType crateType = crate.getCrateType();
 
-        final String weight = crateType != CrateType.casino && crateType != CrateType.cosmic ? StringUtils.format(crate.getChance(getWeight())) : StringUtils.format(crate.getTierChance(getWeight()));
+        final String weight = crateType != CrateType.casino && crateType != CrateType.cosmic && crateType != CrateType.csgo_casino ? StringUtils.format(crate.getChance(getWeight())) : (crateType == CrateType.csgo_casino ? StringUtils.format(crate.getChanceCsgoCasino(this.tiers, getWeight())) : StringUtils.format(crate.getTierChance(getWeight())));
 
         this.displayItem.addPlaceholder("%chance%", weight)
                 .addPlaceholder("%maxpulls%", String.valueOf(maxPulls))

@@ -2,6 +2,7 @@ package com.badbones69.crazycrates.paper.tasks.crates;
 
 import ch.jalu.configme.SettingsManager;
 import com.Zrips.CMI.Modules.ModuleHandling.CMIModule;
+import com.badbones69.crazycrates.paper.tasks.crates.types.*;
 import us.crazycrew.crazycrates.api.enums.messages.Message;
 import com.badbones69.crazycrates.paper.api.CrazyCratesPaper;
 import com.badbones69.crazycrates.paper.api.builders.CrateBuilder;
@@ -14,7 +15,6 @@ import com.badbones69.crazycrates.paper.managers.events.enums.EventType;
 import com.badbones69.crazycrates.paper.support.holograms.types.CMIHologramsSupport;
 import com.badbones69.crazycrates.paper.tasks.crates.other.CosmicCrateManager;
 import com.badbones69.crazycrates.paper.tasks.crates.other.quadcrates.QuadCrateManager;
-import com.badbones69.crazycrates.paper.tasks.crates.types.QuadCrate;
 import com.badbones69.crazycrates.paper.tasks.menus.CrateMainMenu;
 import com.badbones69.crazycrates.paper.api.objects.crates.CrateHologram;
 import com.badbones69.crazycrates.paper.api.objects.crates.quadcrates.CrateSchematic;
@@ -26,16 +26,6 @@ import com.badbones69.crazycrates.paper.utils.MiscUtils;
 import com.badbones69.crazycrates.paper.support.holograms.types.DecentHologramsSupport;
 import com.badbones69.crazycrates.paper.support.holograms.types.FancyHologramsSupport;
 import com.badbones69.crazycrates.paper.managers.InventoryManager;
-import com.badbones69.crazycrates.paper.tasks.crates.types.CasinoCrate;
-import com.badbones69.crazycrates.paper.tasks.crates.types.CosmicCrate;
-import com.badbones69.crazycrates.paper.tasks.crates.types.CrateOnTheGo;
-import com.badbones69.crazycrates.paper.tasks.crates.types.CsgoCrate;
-import com.badbones69.crazycrates.paper.tasks.crates.types.FireCrackerCrate;
-import com.badbones69.crazycrates.paper.tasks.crates.types.QuickCrate;
-import com.badbones69.crazycrates.paper.tasks.crates.types.RouletteCrate;
-import com.badbones69.crazycrates.paper.tasks.crates.types.WarCrate;
-import com.badbones69.crazycrates.paper.tasks.crates.types.WheelCrate;
-import com.badbones69.crazycrates.paper.tasks.crates.types.WonderCrate;
 import com.ryderbelserion.fusion.core.api.enums.Level;
 import com.ryderbelserion.fusion.core.api.exceptions.FusionException;
 import com.ryderbelserion.fusion.files.enums.FileType;
@@ -462,7 +452,7 @@ public class CrateManager {
                 continue;
             }
 
-            if (type == CrateType.cosmic || type == CrateType.casino) {
+            if (type == CrateType.cosmic || type == CrateType.casino || type == CrateType.csgo_casino) {
                 final ConfigurationSection tiersGroup = section.getConfigurationSection("Tiers");
 
                 if (tiersGroup != null) {
@@ -735,6 +725,7 @@ public class CrateManager {
         CrateBuilder crateBuilder;
 
         switch (crate.getCrateType()) {
+            case csgo_casino -> crateBuilder = new CSGOCasinoCrate(crate, player, 45);
             case csgo -> crateBuilder = new CsgoCrate(crate, player, 27);
             case casino -> crateBuilder = new CasinoCrate(crate, player, 27);
             case wonder -> crateBuilder = new WonderCrate(crate, player, 45);

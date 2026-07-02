@@ -121,6 +121,7 @@ public class Crate {
 
     private double sum = 0;
     private double tierSum = 0;
+    private Map<String, Double> csgoCasinoSum = new HashMap<>();
 
     private String animationName;
 
@@ -245,6 +246,7 @@ public class Crate {
         this.prizes = prizes;
 
         this.sum = this.prizes.stream().filter(prize -> prize.getWeight() != -1).mapToDouble(Prize::getWeight).sum();
+        this.prizes.forEach(prize -> prize.getTiers().forEach(tier -> this.csgoCasinoSum.compute(tier.getName(), (k, v) -> (v == null ? 0.0 : v) + prize.getWeight())));
 
         this.crateType = crateType;
         this.previewToggle = this.section.getBoolean("Preview.Toggle", false);
@@ -304,6 +306,8 @@ public class Crate {
             }
 
             case casino -> this.tierSum = this.tiers.stream().filter(tier -> tier.getWeight() != -1).mapToDouble(Tier::getWeight).sum();
+
+            case csgo_casino -> this.tierSum = 100.0D;
         }
     }
 
@@ -481,7 +485,10 @@ public class Crate {
             if (prize.getTiers().contains(tier)) prizes.add(prize);
         }
 
-        return getPrize(prizes);
+        if (this.crateType == CrateType.csgo_casino)
+            return getPrizeCsgoCasino(tier.getName(), prizes);
+        else
+            return getPrize(prizes);
     }
 
     private boolean validatePrize(@NotNull Player player, Prize prize) { // if this is true at any point, we should continue the loop
@@ -534,6 +541,43 @@ public class Crate {
      */
     public double getChance(final double weight) {
         return (weight / this.sum) * 100D;
+    }
+
+    /**
+     * Checks the chances and returns usable prizes.
+     *
+     * @param tierName The tier to match prizes with for calculation
+     * @param prizes The prizes to check
+     * @return {@link Prize}
+     */
+    private Prize getPrizeCsgoCasino(@NotNull String tierName, @NotNull final List<Prize> prizes) {
+        List<Prize> newPrizes = prizes.stream().filter(prize -> prize.getTiers().stream().filter(tier -> tier.getName().equals(tierName)).count() > 0).toList();
+        double totalWeight = this.crateType == CrateType.csgo_casino ? newPrizes.stream().filter(prize -> prize.getTiers().stream().filter(tier -> tier.getName().equals(tierName) && this.csgoCasinoSum.containsKey(tierName)).count() > 0 && prize.getWeight() != -1).mapToDouble(Prize::getWeight).sum() : this.csgoCasinoSum.getOrDefault(tierName, 0.0);
+
+        int index = 0;
+
+        for (double value = MiscUtils.getRandom().nextDouble() * totalWeight; index < newPrizes.size() - 1; index++) {
+            value -= newPrizes.get(index).getWeight();
+
+            if (value < 0.0) break;
+        }
+
+        return newPrizes.get(index);
+    }
+
+    /**
+     * Gets the chance of the prize unique to CSGOCasino
+     *
+     * @param tiers list of tiers for the given prize
+     * @param weight the weight out of the sum
+     * @return the chance
+     */
+    public double getChanceCsgoCasino(List<Tier> tiers, final double weight) {
+        double targetSum = 0.0;
+        for (Tier tier : tiers) {
+            targetSum += this.csgoCasinoSum.get(tier.getName());
+        }
+        return (weight / targetSum) * 100D;
     }
 
     /**
