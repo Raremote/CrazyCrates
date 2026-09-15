@@ -3,11 +3,8 @@ package com.badbones69.crazycrates.paper.commands.crates.types.admin.keys;
 import us.crazycrew.crazycrates.api.enums.messages.Message;
 import com.badbones69.crazycrates.paper.api.PrizeManager;
 import com.badbones69.crazycrates.paper.api.objects.Crate;
-import com.badbones69.crazycrates.paper.api.objects.Prize;
-import com.badbones69.crazycrates.paper.api.objects.Tier;
 import com.badbones69.crazycrates.paper.managers.events.EventManager;
 import com.badbones69.crazycrates.paper.managers.events.enums.EventType;
-import com.badbones69.crazycrates.paper.tasks.crates.other.CosmicCrateManager;
 import com.badbones69.crazycrates.paper.utils.MiscUtils;
 import com.badbones69.crazycrates.paper.commands.crates.types.BaseCommand;
 import com.ryderbelserion.fusion.core.api.enums.Level;
@@ -19,17 +16,13 @@ import dev.triumphteam.cmd.core.annotations.Syntax;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionDefault;
-import org.jetbrains.annotations.Nullable;
 import us.crazycrew.crazycrates.api.enums.types.CrateType;
 import us.crazycrew.crazycrates.api.enums.types.KeyType;
 import com.badbones69.common.config.impl.ConfigKeys;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class CommandOpen extends BaseCommand {
 
@@ -241,7 +234,6 @@ public class CommandOpen extends BaseCommand {
             return;
         }
 
-        final CrateType crateType = crate.getCrateType();
         final String fancyName = crate.getCrateName();
         final String fileName = crate.getFileName();
         final String keyName = crate.getKeyName();
@@ -276,8 +268,6 @@ public class CommandOpen extends BaseCommand {
 
         this.crateManager.addPlayerToOpeningList(player, crate);
 
-        final ConfigurationSection configuration = crate.getSection();
-
         for (;keys > 0; keys--) { // check keys first.
             if (currentAmount >= crate.getMaxMassOpen()) break;
 
@@ -309,139 +299,13 @@ public class CommandOpen extends BaseCommand {
                 break;
             }
 
-            switch (crateType) {
-                case csgo_casino -> {
-                    final ConfigurationSection section = configuration.getConfigurationSection("random");
+            if (!PrizeManager.giveRewards(player, crate)) {
+                currentAmount--;
+                keysRefund++;
 
-                    if (section != null) {
-                        final boolean isRandom = section.getBoolean("toggle", false);
+                isLoopBroken = true;
 
-                        if (isRandom) {
-                            final List<Tier> tiers = crate.getTiers();
-
-                            final int size = tiers.size();
-
-                            final ThreadLocalRandom random = ThreadLocalRandom.current();
-
-                            final Tier tier = tiers.get(random.nextInt(size));
-
-                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, tier));
-                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, tier));
-                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, tier));
-                        } else {
-                            @Nullable final Tier row_uno = crate.getTier(section.getString("types.row-1", ""));
-                            @Nullable final Tier row_dos = crate.getTier(section.getString("types.row-2", ""));
-                            @Nullable final Tier row_tres = crate.getTier(section.getString("types.row-3", ""));
-
-                            if (row_uno == null || row_dos == null || row_tres == null) {
-                                if (this.fusion.isVerbose()) {
-                                    List.of(
-                                            "One of your rows has a tier that doesn't exist supplied in " + fileName,
-                                            "You can find this in your crate config, search for row-1, row-2, and row-3"
-                                    ).forEach(this.logger::warn);
-                                }
-
-                                currentAmount--;
-                                keysRefund++;
-
-                                isLoopBroken = true;
-
-                                break;
-                            }
-
-                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, row_uno));
-                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, row_dos));
-                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, row_tres));
-                        }
-                    }
-                }
-
-                case casino -> {
-                    final ConfigurationSection section = configuration.getConfigurationSection("random");
-
-                    if (section != null) {
-                        final boolean isRandom = section.getBoolean("toggle", false);
-
-                        if (isRandom) {
-                            final List<Tier> tiers = crate.getTiers();
-
-                            final int size = tiers.size();
-
-                            final ThreadLocalRandom random = ThreadLocalRandom.current();
-
-                            final Tier tier = tiers.get(random.nextInt(size));
-
-                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, tier));
-                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, tier));
-                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, tier));
-                        } else {
-                            @Nullable final Tier row_uno = crate.getTier(section.getString("types.row-1", ""));
-                            @Nullable final Tier row_dos = crate.getTier(section.getString("types.row-2", ""));
-                            @Nullable final Tier row_tres = crate.getTier(section.getString("types.row-3", ""));
-
-                            if (row_uno == null || row_dos == null || row_tres == null) {
-                                if (this.fusion.isVerbose()) {
-                                    List.of(
-                                            "One of your rows has a tier that doesn't exist supplied in " + fileName,
-                                            "You can find this in your crate config, search for row-1, row-2, and row-3"
-                                    ).forEach(this.logger::warn);
-                                }
-
-                                currentAmount--;
-                                keysRefund++;
-
-                                isLoopBroken = true;
-
-                                break;
-                            }
-
-                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, row_uno));
-                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, row_dos));
-                            PrizeManager.givePrize(player, crate, crate.pickPrize(player, row_tres));
-                        }
-                    }
-                }
-
-                case cosmic -> {
-                    final List<Tier> tiers = crate.getTiers();
-
-                    if (tiers.isEmpty()) {
-                        currentAmount--;
-                        keysRefund++;
-
-                        isLoopBroken = true;
-
-                        break;
-                    }
-
-                    final int size = tiers.size();
-
-                    final ThreadLocalRandom random = ThreadLocalRandom.current();
-
-                    final CosmicCrateManager cosmicCrateManager = (CosmicCrateManager) crate.getManager();
-
-                    final int totalPrizes = cosmicCrateManager.getTotalPrizes();
-
-                    for (int i = 0; i < totalPrizes; i++) {
-                        final Tier tier = tiers.get(random.nextInt(size));
-
-                        final Prize prize = crate.pickPrize(player, tier);
-
-                        PrizeManager.givePrize(player, crate, prize);
-                    }
-                }
-
-                case quad_crate -> {
-                    for (int i = 0; i < 4; i++) {
-                        PrizeManager.givePrize(player, crate, crate.pickPrize(player));
-                    }
-                }
-
-                default -> {
-                    final Prize prize = crate.pickPrize(player);
-
-                    PrizeManager.givePrize(player, crate, prize);
-                }
+                break;
             }
 
             keysUsed++;

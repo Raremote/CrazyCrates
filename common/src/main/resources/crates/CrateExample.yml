@@ -161,6 +161,9 @@ Crate:
         Id: ""
   # Settings related to animations...
   Animation:
+    # Should the animation play when this crate is opened?
+    # If false, the rewards are given instantly with no animation.
+    Toggle: true
     # This is only when an animation starts.
     # Set this to empty if you don't want to change it.
     Name: "Rolling your prize..."

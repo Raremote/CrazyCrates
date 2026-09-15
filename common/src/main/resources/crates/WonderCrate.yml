@@ -12,6 +12,11 @@ Crate:
   RequiredKeys: 5
   # Max amount of crates that can be opened at once using /crates mass-open
   Max-Mass-Open: 10
+  # Settings related to animations...
+  Animation:
+    # Should the animation play when this crate is opened?
+    # If false, the rewards are given instantly with no animation.
+    Toggle: true
   # If the crate shows in the /crates.
   # If the type is QuickCrate/CrateOnTheGo/FireCracker, They will not work as they require a Physical Crate.
   InGUI: true

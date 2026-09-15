@@ -124,6 +124,7 @@ public class Crate {
     private Map<String, Double> csgoCasinoSum = new HashMap<>();
 
     private String animationName;
+    private boolean animation = true;
 
     /**
      * @param name The name of the crate.
@@ -168,6 +169,8 @@ public class Crate {
         ConfigurationSection itemsSection = null;
 
         if (animationSection != null) {
+            this.animation = animationSection.getBoolean("Toggle", true);
+
             this.animationName = animationSection.getString("Name", "Rolling your prize...");
 
             final ConfigurationSection frameSection = animationSection.contains("Glass-Frame") ? animationSection.getConfigurationSection("Glass-Frame") : animationSection.createSection("Glass-Frame");
@@ -319,6 +322,13 @@ public class Crate {
 
     public @NotNull String getAnimationName() {
         return this.animationName;
+    }
+
+    /**
+     * @return true if the crate should play its animation, false if rewards are given instantly.
+     */
+    public boolean isAnimationEnabled() {
+        return this.animation;
     }
 
     public @Nullable Color getColor() {

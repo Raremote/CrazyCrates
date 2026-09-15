@@ -722,6 +722,15 @@ public class CrateManager {
 
         final String fancyName = crate.getCrateName();
 
+        final CrateType crateType = crate.getCrateType();
+
+        // If animations are disabled and the crate type is not inherently instant or location based, give the rewards instantly.
+        if (!crate.isAnimationEnabled() && crateType != CrateType.crate_on_the_go && crateType != CrateType.quick_crate && crateType != CrateType.fire_cracker && crateType != CrateType.quad_crate) {
+            new InstantCrate(crate, player, location).open(keyType, checkHand, isSilent, crate.useRequiredKeys() ? crate.getRequiredKeys() : 1, eventType);
+
+            return;
+        }
+
         CrateBuilder crateBuilder;
 
         switch (crate.getCrateType()) {

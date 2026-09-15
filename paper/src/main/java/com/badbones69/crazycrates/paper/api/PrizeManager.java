@@ -8,6 +8,7 @@ import com.badbones69.crazycrates.paper.api.events.PlayerPrizeEvent;
 import com.badbones69.crazycrates.paper.api.objects.Crate;
 import com.badbones69.crazycrates.paper.api.objects.Prize;
 import com.badbones69.crazycrates.paper.managers.BukkitUserManager;
+import com.badbones69.crazycrates.paper.tasks.crates.other.CosmicCrateManager;
 import com.ryderbelserion.fusion.core.api.enums.Level;
 import com.ryderbelserion.fusion.core.utils.StringUtils;
 import com.ryderbelserion.fusion.paper.FusionPaper;
@@ -27,6 +28,7 @@ import us.crazycrew.crazycrates.api.enums.types.CrateType;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class PrizeManager {
     
@@ -279,6 +281,89 @@ public class PrizeManager {
         if (item == null) return;
 
         givePrize(player, player.getLocation().clone().add(0, 1, 0), crate, crate.getPrize(item));
+    }
+
+    /**
+     * Grants a single roll of rewards for the crate type without any animation.
+     *
+     * @param player who the prizes are for
+     * @param crate the crate being opened
+     * @return true if the rewards were given, false if the crate type is misconfigured.
+     */
+    public static boolean giveRewards(@NotNull final Player player, @NotNull final Crate crate) {
+        final ConfigurationSection configuration = crate.getSection();
+        final String fileName = crate.getFileName();
+
+        switch (crate.getCrateType()) {
+            case csgo_casino, casino -> {
+                final ConfigurationSection section = configuration.getConfigurationSection("random");
+
+                if (section != null) {
+                    final boolean isRandom = section.getBoolean("toggle", false);
+
+                    if (isRandom) {
+                        final List<Tier> tiers = crate.getTiers();
+                        final int size = tiers.size();
+                        final ThreadLocalRandom random = ThreadLocalRandom.current();
+                        final Tier tier = tiers.get(random.nextInt(size));
+
+                        givePrize(player, crate, crate.pickPrize(player, tier));
+                        givePrize(player, crate, crate.pickPrize(player, tier));
+                        givePrize(player, crate, crate.pickPrize(player, tier));
+                    } else {
+                        @Nullable final Tier row_uno = crate.getTier(section.getString("types.row-1", ""));
+                        @Nullable final Tier row_dos = crate.getTier(section.getString("types.row-2", ""));
+                        @Nullable final Tier row_tres = crate.getTier(section.getString("types.row-3", ""));
+
+                        if (row_uno == null || row_dos == null || row_tres == null) {
+                            if (fusion.isVerbose()) {
+                                fusion.log(Level.WARNING, "One of your rows has a tier that doesn't exist supplied in %s. You can find this in your crate config, search for row-1, row-2, and row-3", fileName);
+                            }
+
+                            return false;
+                        }
+
+                        givePrize(player, crate, crate.pickPrize(player, row_uno));
+                        givePrize(player, crate, crate.pickPrize(player, row_dos));
+                        givePrize(player, crate, crate.pickPrize(player, row_tres));
+                    }
+                }
+            }
+
+            case cosmic -> {
+                final List<Tier> tiers = crate.getTiers();
+
+                if (tiers.isEmpty()) {
+                    return false;
+                }
+
+                final int size = tiers.size();
+                final ThreadLocalRandom random = ThreadLocalRandom.current();
+                final CosmicCrateManager cosmicCrateManager = (CosmicCrateManager) crate.getManager();
+                final int totalPrizes = cosmicCrateManager.getTotalPrizes();
+
+                for (int i = 0; i < totalPrizes; i++) {
+                    final Tier tier = tiers.get(random.nextInt(size));
+                    final Prize prize = crate.pickPrize(player, tier);
+
+                    givePrize(player, crate, prize);
+                }
+            }
+
+            case quad_crate -> {
+                for (int i = 0; i < 4; i++) {
+                    givePrize(player, crate, crate.pickPrize(player));
+                }
+            }
+
+            default -> {
+                final Prize prize = crate.pickPrize(player);
+
+                givePrize(player, crate, prize);
+            }
+        }
+
+        return true;
     }
 
     public static @Nullable Tier getTier(@NotNull final Crate crate) {
